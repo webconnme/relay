@@ -26,20 +26,20 @@
 package main
 
 import (
-    "github.com/webconnme/go-webconn"
+	"github.com/webconnme/go-webconn"
 )
 
 import (
 	"fmt"
-	"log"
 	"ioctl"
-	"unsafe"
+	"log"
 	"os"
+	"unsafe"
 )
 
 type GpioS struct {
-	io int
-	mode int
+	io    int
+	mode  int
 	value int
 }
 
@@ -54,11 +54,11 @@ var file *os.File
 
 func GPIOOpen() {
 	var err error
-	file, err = os.OpenFile("/dev/ioctl_gpio", os.O_RDWR | os.O_SYNC, 0777)
+	file, err = os.OpenFile("/dev/ioctl_gpio", os.O_RDWR|os.O_SYNC, 0777)
 	if err != nil {
 		log.Fatal("open", err)
 	}
-	log.Println("GPIO Open...");
+	log.Println("GPIO Open...")
 
 }
 
@@ -68,30 +68,30 @@ func GPIOClose() {
 }
 
 func GpioOut(buf []byte) error {
-	g := GpioS {28, 0, 0}
+	g := GpioS{28, 0, 0}
 	header := unsafe.Pointer(&g)
 
-    state := string(buf)
+	state := string(buf)
 
-    if state == "on" {
-        g.value = 1
-    }else if state == "off" {
-        g.value = 0
-    }
+	if state == "on" {
+		g.value = 1
+	} else if state == "off" {
+		g.value = 0
+	}
 
-    ioctl.IOCTL(uintptr(file.Fd()), IOCTL_GPIO_SET_OUTPUT, uintptr(header))
+	ioctl.IOCTL(uintptr(file.Fd()), IOCTL_GPIO_SET_OUTPUT, uintptr(header))
 
-    fmt.Println(">>>power stat : ", g.value)
+	fmt.Println(">>>power stat : ", g.value)
 
-    return nil
+	return nil
 }
 
 func main() {
 	GPIOOpen()
-    defer GPIOClose()
+	defer GPIOClose()
 
-    client = webconn.NewClient("http://nor.kr:3002/v01/relay/80")
-    client.AddHandler("power", GpioOut)
+	client = webconn.NewClient("http://nor.kr:3002/v01/relay/80")
+	client.AddHandler("power", GpioOut)
 
-    client.Run()
+	client.Run()
 }
